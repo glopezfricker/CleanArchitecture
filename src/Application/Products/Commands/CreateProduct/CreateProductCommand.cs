@@ -6,7 +6,7 @@ using MediatR;
 namespace CleanArchitecture.Application.Products.Commands.CreateProduct;
 public class CreateProductCommand : IRequest<int>
 {
-    public int CategoryId { get; set; };
+    public int CategoryId { get; set; }
     public string? Name { get; set; }
 }
 

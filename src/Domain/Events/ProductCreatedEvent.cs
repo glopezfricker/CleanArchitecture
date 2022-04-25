@@ -9,7 +9,7 @@ public class ProductCreatedEvent : DomainEvent
 {
     public ProductCreatedEvent(Product product)
     {
-        product = product;
+        prod = product;
     }
     public Product prod { get; }
 }
