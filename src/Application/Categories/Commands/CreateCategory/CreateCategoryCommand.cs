@@ -20,12 +20,9 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
 
     public async Task<int> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
-        var entity = new Category
-        {
-            Name = request.Name,
-        };
-
-        entity.DomainEvents.Add(new CategoryCreatedEvent(entity));
+        var entity = new Category();
+        
+        entity.Name = request.Name;
         
         _context.Categories.Add(entity);
 

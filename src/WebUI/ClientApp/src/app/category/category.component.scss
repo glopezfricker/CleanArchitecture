@@ -6,3 +6,12 @@
 .card{
     margin-bottom: 20px;
 }
+
+.flex {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .flex-item + .flex-item {
+    margin-left: 10px;
+  }

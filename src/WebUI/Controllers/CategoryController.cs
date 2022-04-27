@@ -14,5 +14,12 @@ public class CategoryController : ApiControllerBase
     public async Task<ActionResult<CategoriesVm>> Get()
     {
         return await Mediator.Send(new GetCategoriesQuery());
-    }        
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<int>> Create(CreateCategoryCommand command)
+    {
+        return await Mediator.Send(command);
+    }
+
 }

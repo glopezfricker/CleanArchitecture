@@ -13,6 +13,8 @@ public class Product : AuditableEntity, IHasDomainEvent {
     public int Price { get; set; }
 
     public int Stock { get; set; }
+
+    //public int minStock {get; set; }
         
     public List<DomainEvent> DomainEvents { get; set; } = new List<DomainEvent>();
 }

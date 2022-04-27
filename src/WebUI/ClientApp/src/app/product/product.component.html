@@ -10,29 +10,30 @@
             <th>Descripcion</th>
             <th>Precio</th>
             <th>Stock</th>
+            <th></th>            
+            <th></th>            
         </tr>
 
         <tr *ngFor="let product of products">
-            <td><img [src]="product.img" style="width:250px;"></td>
+            <td><img [src]="product.img" style="width:200px;"></td>
             <td>{{product.name}}</td>
             <td>{{product.description}}</td>
             <td>{{product.price | currency }}</td>        
             <td *ngIf="product.stock > minStock"><span class="badge badge-success spanStock">OK</span></td>
             <td *ngIf="product.stock <= minStock && product.stock > 0"><span class="badge badge-warning">BAJO</span></td>
             <td *ngIf="product.stock == 0"><span class="badge badge-danger">SIN STOCK</span></td>            
+            <td>
+                <button type="button"class="btn btn-danger" >Eliminar</button>                                
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary" >Modificar Producto</button>
+            </td>
         </tr>
     </table>
-</div>    
-    <div class="row">
-        <div class="col-md-4 col-lg-2">
-            <button type="button" class="btn btn-lg btn-primary" style="margin-right:25px; margin-bottom: 10px;" >Agregar Producto</button>
-        </div>
-        
-        <div class="col-md-4 col-lg-2">        
-            <button type="button" class="btn btn-lg btn-primary" style="margin-right:25px; margin-bottom: 10px">Eliminar Producto</button>
-        </div>
-        
-        <div class="col-md-4 col-lg-2">
-            <button type="button" class="btn btn-lg btn-primary" style="margin-bottom: 10px">Modificar Producto</button>
-        </div>    
-    </div>
+</div>  
+<hr>  
+<div class="row">
+    <div class="col-md-4 ">
+        <button type="button" class="btn btn-lg btn-primary" style="margin-bottom: 25px;">Agregar Producto</button>
+    </div> 
+</div>
