@@ -14,13 +14,13 @@
             <th></th>            
         </tr>
 
-        <tr *ngFor="let product of products">
+        <tr *ngFor="let product of vm.products">
             <td><img [src]="product.img" style="width:200px;"></td>
             <td>{{product.name}}</td>
             <td>{{product.description}}</td>
             <td>{{product.price | currency }}</td>        
-            <td *ngIf="product.stock > minStock"><span class="badge badge-success spanStock">OK</span></td>
-            <td *ngIf="product.stock <= minStock && product.stock > 0"><span class="badge badge-warning">BAJO</span></td>
+            <td *ngIf="product.stock > product.minStock"><span class="badge badge-success spanStock">OK</span></td>
+            <td *ngIf="product.stock <= product.minStock && product.stock > 0"><span class="badge badge-warning">BAJO</span></td>
             <td *ngIf="product.stock == 0"><span class="badge badge-danger">SIN STOCK</span></td>            
             <td>
                 <button type="button"class="btn btn-danger" >Eliminar</button>                                

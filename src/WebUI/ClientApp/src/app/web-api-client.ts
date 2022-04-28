@@ -133,6 +133,72 @@ export class CategoryClient implements ICategoryClient {
     }
 }
 
+export interface IProductClient {
+    get(): Observable<ProductsVm>;
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class ProductClient implements IProductClient {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl !== undefined && baseUrl !== null ? baseUrl : "";
+    }
+
+    get() : Observable<ProductsVm> {
+        let url_ = this.baseUrl + "/api/Product";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(<any>response_);
+                } catch (e) {
+                    return <Observable<ProductsVm>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<ProductsVm>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<ProductsVm> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ProductsVm.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<ProductsVm>(<any>null);
+    }
+}
+
 export interface ITodoItemsClient {
     getTodoItemsWithPagination(listId: number | undefined, pageNumber: number | undefined, pageSize: number | undefined): Observable<PaginatedListOfTodoItemBriefDto>;
     create(command: CreateTodoItemCommand): Observable<number>;
@@ -816,6 +882,8 @@ export interface ICategoriesVm {
 export class CategoriesDto implements ICategoriesDto {
     id?: number;
     name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
 
     constructor(data?: ICategoriesDto) {
         if (data) {
@@ -830,6 +898,8 @@ export class CategoriesDto implements ICategoriesDto {
         if (_data) {
             this.id = _data["id"];
             this.name = _data["name"];
+            this.description = _data["description"];
+            this.img = _data["img"];
         }
     }
 
@@ -844,6 +914,8 @@ export class CategoriesDto implements ICategoriesDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["name"] = this.name;
+        data["description"] = this.description;
+        data["img"] = this.img;
         return data; 
     }
 }
@@ -851,6 +923,8 @@ export class CategoriesDto implements ICategoriesDto {
 export interface ICategoriesDto {
     id?: number;
     name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
 }
 
 export class CreateCategoryCommand implements ICreateCategoryCommand {
@@ -887,6 +961,110 @@ export class CreateCategoryCommand implements ICreateCategoryCommand {
 
 export interface ICreateCategoryCommand {
     name?: string | undefined;
+}
+
+export class ProductsVm implements IProductsVm {
+    products?: ProductsDto[];
+
+    constructor(data?: IProductsVm) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["products"])) {
+                this.products = [] as any;
+                for (let item of _data["products"])
+                    this.products!.push(ProductsDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): ProductsVm {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProductsVm();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.products)) {
+            data["products"] = [];
+            for (let item of this.products)
+                data["products"].push(item.toJSON());
+        }
+        return data; 
+    }
+}
+
+export interface IProductsVm {
+    products?: ProductsDto[];
+}
+
+export class ProductsDto implements IProductsDto {
+    id?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
+    price?: number;
+    stock?: number;
+    minStock?: number;
+
+    constructor(data?: IProductsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.img = _data["img"];
+            this.price = _data["price"];
+            this.stock = _data["stock"];
+            this.minStock = _data["minStock"];
+        }
+    }
+
+    static fromJS(data: any): ProductsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ProductsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["img"] = this.img;
+        data["price"] = this.price;
+        data["stock"] = this.stock;
+        data["minStock"] = this.minStock;
+        return data; 
+    }
+}
+
+export interface IProductsDto {
+    id?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
+    price?: number;
+    stock?: number;
+    minStock?: number;
 }
 
 export class PaginatedListOfTodoItemBriefDto implements IPaginatedListOfTodoItemBriefDto {

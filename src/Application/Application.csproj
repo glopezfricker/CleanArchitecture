@@ -9,6 +9,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Products\Queries\NewFolder1\**" />
+      <Compile Remove="Products\Queries\NewFolder\**" />
+      <EmbeddedResource Remove="Products\Queries\NewFolder1\**" />
+      <EmbeddedResource Remove="Products\Queries\NewFolder\**" />
+      <None Remove="Products\Queries\NewFolder1\**" />
+      <None Remove="Products\Queries\NewFolder\**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.4" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
@@ -17,10 +26,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Domain\Domain.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Products\Queries\GetProducts\" />
     </ItemGroup>
 
 </Project>
