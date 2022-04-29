@@ -1,28 +1,66 @@
-<div class="container">
-    <div class="row">
-      <div class="col-md-4" *ngFor="let category of vm.categories">
+<div class="spinner-border m-5" role="status" *ngIf = "!vm">
+  <span class="visually-hidden"></span>
+</div>
+<div *ngIf = "vm">
+  <div class="container">
+      <div class="row">
+        <div class="col-md-4" *ngFor="let category of vm.categories">
 
-        <div class="card">
-            <img class="card-img-top" [src]="category.img">
-            <div class="card-header">
-              {{category.name}}
+          <div class="card">
+              <img class="card-img-top" [src]="category.img">
+              <div class="card-header">
+                {{category.name}}
+              </div>
+              <div class="card-body">
+              {{category.description}}             
+              </div>
+              <hr>
+              <div class="flex">
+                <button class="btn btn-danger"  style="margin-right:10px;margin-bottom:15px;">Eliminar</button>
+                <button class="btn btn-primary" style="margin-bottom:15px;">Modificar</button>
+              </div>
             </div>
-            <div class="card-body">
-             {{category.description}}             
-            </div>
-            <hr>
-            <div class="flex">
-              <button class="btn btn-danger"  style="margin-right:10px;margin-bottom:15px;">Eliminar</button>
-              <button class="btn btn-primary" style="margin-bottom:15px;">Modificar</button>
-            </div>
-          </div>
 
+        </div>
       </div>
     </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-4">
+          <button type="button" class="btn btn-lg btn-primary" style="margin-right:25px; margin-bottom: 10px;" (click)="showNewCategoryModal(newCategoryModalTemplate)" >Agregar Categoria</button>
+      </div>
   </div>
-  <hr>
-  <div class="row">
-    <div class="col-md-4">
-        <button type="button" class="btn btn-lg btn-primary" style="margin-right:25px; margin-bottom: 10px;" >Agregar Categoria</button>
-    </div>
 </div>
+
+<ng-template #newCategoryModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">Agregar Categoria</h4>
+    <button type="button" class="close float-right" aria-label="Cerrar" (click)="newCategoryCancelled()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="name">Nombre</label>
+      <input type="text" class="form-control" id="name" placeholder="Nombre categoria..." [(ngModel)]="newCategoryEditor.name"
+        [ngClass]="{ 'is-invalid': newCategoryEditor.error }"  />
+      <div *ngIf="newCategoryEditor.error" class="invalid-feedback">
+        {{ newCategoryEditor.error }}
+      </div>
+
+      <label for="description">Descripcion</label>
+      <input type="text" class="form-control" id="description" placeholder="Descripcion categoria..." [(ngModel)] = "newCategoryEditor.description"
+        [ngClass] ="{ 'is-invalid': newCategoryEditor.error }" />
+
+      <label for="img">Imagen</label>
+      <input type="text" class="form-control" id="img" placeholder="Imagen categoria..." [(ngModel)] = "newCategoryEditor.img"
+        [ngClass] ="{ 'is-invalid': newCategoryEditor.error }" />
+    </div>    
+  </div>
+  <div class="modal-footer">
+    <div class="text-right">
+      <button class="btn btn-default" (click)="newCategoryCancelled()">Cancel</button>
+      <button class="btn btn-primary" (click)="addCategory()">Create</button>
+    </div>
+  </div>
+</ng-template>

@@ -8,6 +8,12 @@ public class CreateProductCommand : IRequest<int>
 {
     public int CategoryId { get; set; }
     public string? Name { get; set; }
+    public string? Description { get; set; }
+    public string? img { get; set; }
+    public int price { get; set; }
+    public int stock { get; set; }
+    public int minStock { get; set; }
+
 }
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, int>
@@ -24,7 +30,12 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
         var entity = new Product
         {
             CategoryId = request.CategoryId,
-            Name = request.Name
+            Name = request.Name,
+            Description = request.Description,
+            Img = request.img,
+            Price = request.price,
+            Stock = request.stock,
+            minStock = request.minStock
         };
 
         entity.DomainEvents.Add(new ProductCreatedEvent(entity));

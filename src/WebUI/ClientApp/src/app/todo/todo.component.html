@@ -2,7 +2,10 @@
 
 <p>This is a complex todo list component.</p>
 
-<p *ngIf="!vm"><em>Loading...</em></p>
+<!-- <p *ngIf="!vm"><em>Loading...</em></p> -->
+<div class="spinner-border m-5" role="status" *ngIf = "!vm">
+  <span class="visually-hidden"></span>
+</div>
 
 <div *ngIf="vm">
 

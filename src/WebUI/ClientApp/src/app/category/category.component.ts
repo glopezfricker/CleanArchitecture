@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { CategoriesDto, CategoriesVm,  CategoryClient} from '../web-api-client';
+import { Component, TemplateRef, OnInit } from '@angular/core';
+import { CategoriesDto, CategoriesVm,  CategoryClient, CreateCategoryCommand} from '../web-api-client';
 //import { faPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-category',
@@ -11,7 +12,10 @@ export class CategoryComponent implements OnInit {
   vm: CategoriesVm;
   selectedCategories: CategoriesDto;
 
-  constructor(private categoryClient: CategoryClient) { 
+  newCategoryModalRef: BsModalRef;
+  newCategoryEditor: any = {};
+
+  constructor(private categoryClient: CategoryClient, private modalService: BsModalService) { 
     categoryClient.get().subscribe(
       result => { 
         this.vm = result;
@@ -20,6 +24,44 @@ export class CategoryComponent implements OnInit {
         }
       },
       error => console.error(error)
+    );
+  }
+  showNewCategoryModal(template: TemplateRef<any>): void {
+    this.newCategoryModalRef = this.modalService.show(template);
+    setTimeout(() => document.getElementById("name").focus(), 250);
+  }
+
+  newCategoryCancelled(): void {
+    this.newCategoryModalRef.hide();
+    this.newCategoryEditor = {};
+  }
+
+  addCategory(): void {
+    let category = CategoriesDto.fromJS({
+      id: 0,
+      name: this.newCategoryEditor.name,            
+      description: this.newCategoryEditor.description,
+      img: this.newCategoryEditor.img,
+    });
+
+    this.categoryClient.create(<CreateCategoryCommand>{ name: this.newCategoryEditor.name}).subscribe(
+      result => {
+        category.id = result;
+        this.vm.categories.push(category);
+        this.selectedCategories = category;
+        this.newCategoryModalRef.hide();
+        this.newCategoryEditor = {};
+      },
+      error => {
+        let errors = JSON.parse(error.response);
+
+        if(errors && errors.Title) {
+          this.newCategoryEditor.error = errors.Title[0];
+        }
+
+        setTimeout(() => document.getElementById("name").focus(), 250);
+
+      }
     );
   }
 

@@ -135,6 +135,7 @@ export class CategoryClient implements ICategoryClient {
 
 export interface IProductClient {
     get(): Observable<ProductsVm>;
+    create(command: CreateProductCommand): Observable<number>;
 }
 
 @Injectable({
@@ -196,6 +197,58 @@ export class ProductClient implements IProductClient {
             }));
         }
         return _observableOf<ProductsVm>(<any>null);
+    }
+
+    create(command: CreateProductCommand) : Observable<number> {
+        let url_ = this.baseUrl + "/api/Product";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(<any>response_);
+                } catch (e) {
+                    return <Observable<number>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<number>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<number>(<any>null);
     }
 }
 
@@ -929,6 +982,8 @@ export interface ICategoriesDto {
 
 export class CreateCategoryCommand implements ICreateCategoryCommand {
     name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
 
     constructor(data?: ICreateCategoryCommand) {
         if (data) {
@@ -942,6 +997,8 @@ export class CreateCategoryCommand implements ICreateCategoryCommand {
     init(_data?: any) {
         if (_data) {
             this.name = _data["name"];
+            this.description = _data["description"];
+            this.img = _data["img"];
         }
     }
 
@@ -955,12 +1012,16 @@ export class CreateCategoryCommand implements ICreateCategoryCommand {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["name"] = this.name;
+        data["description"] = this.description;
+        data["img"] = this.img;
         return data; 
     }
 }
 
 export interface ICreateCategoryCommand {
     name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
 }
 
 export class ProductsVm implements IProductsVm {
@@ -1009,6 +1070,7 @@ export interface IProductsVm {
 
 export class ProductsDto implements IProductsDto {
     id?: number;
+    categoryId?: number;
     name?: string | undefined;
     description?: string | undefined;
     img?: string | undefined;
@@ -1028,6 +1090,7 @@ export class ProductsDto implements IProductsDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
+            this.categoryId = _data["categoryId"];
             this.name = _data["name"];
             this.description = _data["description"];
             this.img = _data["img"];
@@ -1047,6 +1110,7 @@ export class ProductsDto implements IProductsDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
+        data["categoryId"] = this.categoryId;
         data["name"] = this.name;
         data["description"] = this.description;
         data["img"] = this.img;
@@ -1059,6 +1123,67 @@ export class ProductsDto implements IProductsDto {
 
 export interface IProductsDto {
     id?: number;
+    categoryId?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
+    price?: number;
+    stock?: number;
+    minStock?: number;
+}
+
+export class CreateProductCommand implements ICreateProductCommand {
+    categoryId?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
+    price?: number;
+    stock?: number;
+    minStock?: number;
+
+    constructor(data?: ICreateProductCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.categoryId = _data["categoryId"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.img = _data["img"];
+            this.price = _data["price"];
+            this.stock = _data["stock"];
+            this.minStock = _data["minStock"];
+        }
+    }
+
+    static fromJS(data: any): CreateProductCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new CreateProductCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["categoryId"] = this.categoryId;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["img"] = this.img;
+        data["price"] = this.price;
+        data["stock"] = this.stock;
+        data["minStock"] = this.minStock;
+        return data; 
+    }
+}
+
+export interface ICreateProductCommand {
+    categoryId?: number;
     name?: string | undefined;
     description?: string | undefined;
     img?: string | undefined;

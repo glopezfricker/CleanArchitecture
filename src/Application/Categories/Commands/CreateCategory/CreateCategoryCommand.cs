@@ -7,6 +7,10 @@ namespace CleanArchitecture.Application.Categories.Commands.CreateCategory;
 public class CreateCategoryCommand : IRequest<int>
 {    
     public string? Name { get; set; } 
+    
+    public string? Description { get; set; }
+
+    public string? Img { get; set; }
 }
 
 public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, int>
@@ -23,6 +27,10 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         var entity = new Category();
         
         entity.Name = request.Name;
+
+        entity.Description = request.Description;
+
+        entity.Img = request.Img;
         
         _context.Categories.Add(entity);
 

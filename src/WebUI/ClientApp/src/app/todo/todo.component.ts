@@ -43,6 +43,7 @@ export class TodoComponent {
         );
     }
 
+    
     // Lists
     remainingItems(list: TodoListDto): number {
         return list.items.filter(t => !t.done).length;

@@ -13,4 +13,11 @@ public class ProductController : ApiControllerBase
   {
     return await Mediator.Send(new GetProductsQuery());
   }
+
+  [HttpPost]
+  public async Task<ActionResult<int>> Create(CreateProductCommand command)
+  {
+    return await Mediator.Send(command);
+  }
+
 }

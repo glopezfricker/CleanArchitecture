@@ -1,39 +1,93 @@
-<form class="col-12 col-lg-auto mb-3 mb-lg-0">
-    <input type="search" class="form-control" placeholder="Search..." aria-label="Search" (keyup)="onKeyUpEvent($event)" >
-  </form>
-  <br/>
-<div class ="table-responsive">
-    <table class="table">
-        <tr>
-            <th></th>
-            <th>Nombre</th>
-            <th>Descripcion</th>
-            <th>Precio</th>
-            <th>Stock</th>
-            <th></th>            
-            <th></th>            
-        </tr>
-
-        <tr *ngFor="let product of vm.products">
-            <td><img [src]="product.img" style="width:200px;"></td>
-            <td>{{product.name}}</td>
-            <td>{{product.description}}</td>
-            <td>{{product.price | currency }}</td>        
-            <td *ngIf="product.stock > product.minStock"><span class="badge badge-success spanStock">OK</span></td>
-            <td *ngIf="product.stock <= product.minStock && product.stock > 0"><span class="badge badge-warning">BAJO</span></td>
-            <td *ngIf="product.stock == 0"><span class="badge badge-danger">SIN STOCK</span></td>            
-            <td>
-                <button type="button"class="btn btn-danger" >Eliminar</button>                                
-            </td>
-            <td>
-                <button type="button" class="btn btn-primary" >Modificar Producto</button>
-            </td>
-        </tr>
-    </table>
-</div>  
-<hr>  
-<div class="row">
-    <div class="col-md-4 ">
-        <button type="button" class="btn btn-lg btn-primary" style="margin-bottom: 25px;">Agregar Producto</button>
-    </div> 
+<div class="spinner-border m-5" role="status" *ngIf = "!vm">
+    <span class="visually-hidden"></span>
 </div>
+<div *ngIf ="vm">
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0">
+        <input type="search" class="form-control" placeholder="Search..." aria-label="Search" (keyup)="onKeyUpEvent($event)" >
+    </form>
+    <br/>
+    <div class ="table-responsive">
+        <table class="table">
+            <tr>
+                <th></th>
+                <th>Nombre</th>
+                <th>Descripcion</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th></th>            
+                <th></th>            
+            </tr>
+
+            <tr *ngFor="let product of vm.products">
+                <td><img [src]="product.img" style="width:200px;"></td>
+                <td>{{product.name}}</td>
+                <td>{{product.description}}</td>
+                <td>{{product.price | currency }}</td>        
+                <td *ngIf="product.stock > product.minStock"><span class="badge badge-success spanStock">OK</span></td>
+                <td *ngIf="product.stock <= product.minStock && product.stock > 0"><span class="badge badge-warning">BAJO</span></td>
+                <td *ngIf="product.stock == 0"><span class="badge badge-danger">SIN STOCK</span></td>            
+                <td>
+                    <button type="button"class="btn btn-danger" >Eliminar</button>                                
+                </td>
+                <td>
+                    <button type="button" class="btn btn-primary" >Modificar Producto</button>
+                </td>
+            </tr>
+        </table>
+    </div>  
+    <hr>  
+    <div class="row">
+        <div class="col-md-4 ">
+            <button type="button" class="btn btn-lg btn-primary" style="margin-bottom: 25px;" (click)="showNewProductModal(newProductModalTemplate)">Agregar Producto</button>
+        </div> 
+    </div>
+</div>
+
+<ng-template #newProductModalTemplate>
+    <div class="modal-header clearfix">
+        <h4 class="modal-title float-left">Agregar Producto</h4>
+        <button type="button" class="close float-right" aria-label="Cerrar" (click)="newProductCancelled()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="category">Categoria</label>
+            <input type="text" class="form-control" id="category" placeholder="Categoria producto..." [(ngModel)] = "newProductEditor.categoryId"
+                [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
+
+            <label for="name">Nombre</label>
+            <input type="text" class="form-control" id="name" placeholder="Nombre Producto..." [(ngModel)]="newProductEditor.name"
+                [ngClass]="{ 'is-invalid': newProductEditor.error }"  />
+            <div *ngIf="newProductEditor.error" class="invalid-feedback">
+                {{ newProductEditor.error }}
+            </div>
+
+            <label for="description">Descripcion</label>            
+            <input type="text" class="form-control" id="description" placeholder="Descripcion producto..." [(ngModel)] = "newProductEditor.description"
+                [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
+
+            <label for="img">Imagen</label>
+            <input type="text" class="form-control" id="img" placeholder="Imagen producto..." [(ngModel)] = "newProductEditor.img"
+                [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
+            
+            <label for="price">Precio</label>
+            <input type="text" class="form-control" id="price" placeholder="Precio producto..." [(ngModel)] = "newProductEditor.price"
+                [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
+
+            <label for="stock">Stock</label>
+            <input type="text" class="form-control" id="stock" placeholder="Stock producto..." [(ngModel)] = "newProductEditor.stock"
+                [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
+            
+            <label for="minStock">Stock Minimo</label>
+            <input type="text" class="form-control" id="minStock" placeholder="Stock minimo producto..." [(ngModel)] = "newProductEditor.minStock"
+                [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
+        </div>    
+    </div>
+    <div class="modal-footer">
+      <div class="text-right">
+        <button class="btn btn-default" (click)="newProductCancelled()">Cancelar</button>
+        <button class="btn btn-primary" (click)="addProduct()">Crear</button>
+      </div>
+    </div>
+  </ng-template>

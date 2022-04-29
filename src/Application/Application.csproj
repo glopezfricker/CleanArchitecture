@@ -18,6 +18,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Categories\Queries\Class1.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="10.3.4" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
@@ -26,6 +30,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Categories\Queries\NewFolder\" />
     </ItemGroup>
 
 </Project>
