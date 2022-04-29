@@ -9,6 +9,9 @@ public class UpdateCategoryCommand : IRequest
 {
     public int Id { get; set; }
     public string? Name { get; set; }
+    public string? Description { get; set; }
+
+    public string? Img { get; set; }
 }
 
 public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryCommand>
@@ -31,6 +34,8 @@ public class UpdateCategoryCommandHandler : IRequestHandler<UpdateCategoryComman
         }
 
         entity.Name = request.Name;
+        entity.Description = request.Description;
+        entity.Img = request.Img;
 
         await _context.SaveChangesAsync(cancellationToken);
 

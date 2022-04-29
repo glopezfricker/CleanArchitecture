@@ -1,7 +1,8 @@
 import { importExpr } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { product } from '../models/product';
-import { ProductsDto, ProductsVm, ProductClient, CreateProductCommand } from '../web-api-client';
+import { ProductsDto, ProductsVm, ProductClient, CreateProductCommand, CategoriesVm, CategoriesDto,CategoryClient } from '../web-api-client';
+import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 @Component({
   selector: 'app-product',
@@ -11,13 +12,18 @@ import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 export class ProductComponent implements OnInit {
 
   vm: ProductsVm;
+  vmCategories: CategoriesVm;
+  selectedCategories: CategoriesDto;
   selectedProducts: ProductsDto;
 
   newProductModalRef: BsModalRef;
   newProductEditor: any = {};
 
-  constructor(private productClient: ProductClient, private modalService: BsModalService) { 
+  faTrash = faTrash;
+  faPenSquare = faPenSquare;
 
+  constructor(private productClient: ProductClient, private categoryClient: CategoryClient, private modalService: BsModalService) { 
+    //TODO: maybe we can combine the observables with forkJoin operator.    
     productClient.get().subscribe(
       result => {
         this.vm = result;
@@ -25,8 +31,22 @@ export class ProductComponent implements OnInit {
           this.selectedProducts = this.vm.products[0];
         }
       },
+      //TODO: perhaps instead of using console implement a toast or an alert to 
+      //notice the user.
       error => console.error(error)
     );
+
+    categoryClient.get().subscribe(
+      result => {
+        this.vmCategories = result;
+        if(this.vmCategories.categories?.length){
+          this.selectedCategories = this.vmCategories.categories[0];
+        }
+      },
+      //TODO: perhaps instead of using console implement a toast or an alert to 
+      //notice the user.
+      error => console.error(error)
+    )
   }
 
   showNewProductModal(template: TemplateRef<any>): void {
@@ -72,6 +92,10 @@ export class ProductComponent implements OnInit {
     
   }
 
+  public changeCategory(e) {
+    this.newProductEditor.categoryId = e.target.value;
+    console.log(e.target.value);
+  }
   ngOnInit(): void {
   }
 

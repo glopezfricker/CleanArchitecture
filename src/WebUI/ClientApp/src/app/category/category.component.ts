@@ -1,6 +1,6 @@
 import { Component, TemplateRef, OnInit } from '@angular/core';
 import { CategoriesDto, CategoriesVm,  CategoryClient, CreateCategoryCommand} from '../web-api-client';
-//import { faPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
@@ -14,6 +14,12 @@ export class CategoryComponent implements OnInit {
 
   newCategoryModalRef: BsModalRef;
   newCategoryEditor: any = {};
+
+  deleteCategoryModalRef: BsModalRef;
+  categoryToDelete: CategoriesDto;
+
+  faTrash = faTrash;
+  faPenSquare = faPenSquare;
 
   constructor(private categoryClient: CategoryClient, private modalService: BsModalService) { 
     categoryClient.get().subscribe(
@@ -65,7 +71,24 @@ export class CategoryComponent implements OnInit {
     );
   }
 
+  confirmDeleteCategory(template: TemplateRef<any>, categoryToDelete: CategoriesDto) {    
+    this.categoryToDelete = categoryToDelete;
+    this.deleteCategoryModalRef = this.modalService.show(template);
+  }
+
+  deleteCategoryConfirmed(): void {
+    this.categoryClient.delete(this.categoryToDelete.id).subscribe(
+      () => {
+        this.deleteCategoryModalRef.hide();
+        this.vm.categories = this.vm.categories.filter(c => c.id != this.categoryToDelete.id)
+        this.selectedCategories = this.vm.categories.length ? this.vm.categories[0] : null;
+      },
+      error => console.log(error)
+    )
+  }
+
   ngOnInit(): void {
+    
   }
 
 }

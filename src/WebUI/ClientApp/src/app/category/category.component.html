@@ -1,7 +1,17 @@
 <div class="spinner-border m-5" role="status" *ngIf = "!vm">
   <span class="visually-hidden"></span>
 </div>
-<div *ngIf = "vm">
+
+<div *ngIf = "vm && vm.categories.length == 0">
+  <div class="alert alert-info" role="alert" > No hay categorias cargadas.</div>
+  <div class="row">
+    <div class="col-md-4">
+        <button type="button" class="btn btn-lg btn-primary" style="margin-right:25px; margin-bottom: 10px;" (click)="showNewCategoryModal(newCategoryModalTemplate)" >Agregar Categoria</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf = "vm && vm.categories.length > 0">
   <div class="container">
       <div class="row">
         <div class="col-md-4" *ngFor="let category of vm.categories">
@@ -16,8 +26,8 @@
               </div>
               <hr>
               <div class="flex">
-                <button class="btn btn-danger"  style="margin-right:10px;margin-bottom:15px;">Eliminar</button>
-                <button class="btn btn-primary" style="margin-bottom:15px;">Modificar</button>
+                <button class="btn btn-danger"  data-toggle="tooltip" data-placement="top" title="Eliminar categoria" style="margin-right:10px;margin-bottom:15px;"  (click)="confirmDeleteCategory(deleteCategoryModalTemplate, category)"><fa-icon [icon]="faTrash"></fa-icon></button>
+                <button class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Modificar categoria" style="margin-bottom:15px;"><fa-icon [icon]="faPenSquare"></fa-icon></button>
               </div>
             </div>
 
@@ -29,7 +39,7 @@
       <div class="col-md-4">
           <button type="button" class="btn btn-lg btn-primary" style="margin-right:25px; margin-bottom: 10px;" (click)="showNewCategoryModal(newCategoryModalTemplate)" >Agregar Categoria</button>
       </div>
-  </div>
+    </div>
 </div>
 
 <ng-template #newCategoryModalTemplate>
@@ -59,8 +69,26 @@
   </div>
   <div class="modal-footer">
     <div class="text-right">
-      <button class="btn btn-default" (click)="newCategoryCancelled()">Cancel</button>
-      <button class="btn btn-primary" (click)="addCategory()">Create</button>
+      <button class="btn btn-default" (click)="newCategoryCancelled()">Cancelar</button>
+      <button class="btn btn-primary" (click)="addCategory()">Crear</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #deleteCategoryModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">Borrar categoria "{{ categoryToDelete?.name }}" ?</h4>
+    <button type="button" class="close float-right" aria-label="Close" (click)="deleteCategoryModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>La categoria sera eliminada. </p>    
+  </div>
+  <div class="modal-footer">
+    <div class="text-right">
+      <button type="button" class="btn btn-default" (click)="deleteCategoryModalRef.hide()">Cancelar</button>
+      <button type="button" class="btn btn-danger" (click)="deleteCategoryConfirmed()">Eliminar</button>
     </div>
   </div>
 </ng-template>
