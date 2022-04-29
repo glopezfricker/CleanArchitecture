@@ -27,7 +27,7 @@
               <hr>
               <div class="flex">
                 <button class="btn btn-danger"  data-toggle="tooltip" data-placement="top" title="Eliminar categoria" style="margin-right:10px;margin-bottom:15px;"  (click)="confirmDeleteCategory(deleteCategoryModalTemplate, category)"><fa-icon [icon]="faTrash"></fa-icon></button>
-                <button class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Modificar categoria" style="margin-bottom:15px;"><fa-icon [icon]="faPenSquare"></fa-icon></button>
+                <button class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="Modificar categoria" style="margin-bottom:15px;" (click)="showCategoryEditorModal(categoryUpdateModalTemplate, category)"><fa-icon [icon]="faPenSquare"></fa-icon></button>
               </div>
             </div>
 
@@ -89,6 +89,38 @@
     <div class="text-right">
       <button type="button" class="btn btn-default" (click)="deleteCategoryModalRef.hide()">Cancelar</button>
       <button type="button" class="btn btn-danger" (click)="deleteCategoryConfirmed()">Eliminar</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #categoryUpdateModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">Info Categoria</h4>
+    <button type="button" class="close float-right" aria-label="Close" (click)="updateCategoryModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="categoryName">Nombre</label>
+      <input type="text" class="form-control" id="categoryName" placeholder="Nombre Categoria..."
+        [(ngModel)]="categoryEditor.name" />
+
+      <label for="categoryDescription">Descripcion</label>
+      <input type="text" class="form-control" id="categoryDescription" placeholder="Descripcion Categoria..."
+        [(ngModel)]="categoryEditor.description"/>
+
+      <label for="categoryImg">Imagen</label>
+      <input type="text" class="form-control" id="categoryImg" placeholder="Imagen Categoria..."
+        [(ngModel)]="categoryEditor.img" />
+    </div>   
+  </div>
+  <div class="modal-footer">
+    <div class="clearfix">      
+      <div class="float-right">
+        <button class="btn btn-default" (click)="updateCategoryModalRef.hide()">Cancelar</button>
+        <button class="btn btn-primary" (click)="updateCategory()">Actualizar</button>
+      </div>
     </div>
   </div>
 </ng-template>

@@ -1,5 +1,5 @@
 import { Component, TemplateRef, OnInit } from '@angular/core';
-import { CategoriesDto, CategoriesVm,  CategoryClient, CreateCategoryCommand} from '../web-api-client';
+import { CategoriesDto, CategoriesVm,  CategoryClient, CreateCategoryCommand, UpdateCategoryCommand} from '../web-api-client';
 import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
@@ -14,9 +14,13 @@ export class CategoryComponent implements OnInit {
 
   newCategoryModalRef: BsModalRef;
   newCategoryEditor: any = {};
+  categoryEditor: any = {};
 
   deleteCategoryModalRef: BsModalRef;
+  updateCategoryModalRef: BsModalRef;
+
   categoryToDelete: CategoriesDto;
+  categoryToUpdate: CategoriesDto;
 
   faTrash = faTrash;
   faPenSquare = faPenSquare;
@@ -76,6 +80,13 @@ export class CategoryComponent implements OnInit {
     this.deleteCategoryModalRef = this.modalService.show(template);
   }
 
+  showCategoryEditorModal(template: TemplateRef<any>, categoryToUpdate: CategoriesDto) {
+    //TODO: Check if we need both objects (categoryToUpdate, categoryEditor)
+    this.categoryToUpdate = categoryToUpdate;
+    this.categoryEditor = this.categoryToUpdate;
+    this.updateCategoryModalRef = this.modalService.show(template);
+  }
+
   deleteCategoryConfirmed(): void {
     this.categoryClient.delete(this.categoryToDelete.id).subscribe(
       () => {
@@ -86,6 +97,20 @@ export class CategoryComponent implements OnInit {
       error => console.log(error)
     )
   }
+
+   updateCategory(){
+     this.categoryClient.update(this.categoryToUpdate.id, UpdateCategoryCommand.fromJS(this.categoryEditor))
+      .subscribe(
+          () => {
+            this.categoryToUpdate.name = this.categoryEditor.name,
+            this.categoryToUpdate.description = this.categoryEditor.description,
+            this.categoryToUpdate.img = this.categoryEditor.img,
+            this.updateCategoryModalRef.hide();
+            this.categoryEditor = {};
+          },
+          error => console.error(error)
+      );
+   }
 
   ngOnInit(): void {
     

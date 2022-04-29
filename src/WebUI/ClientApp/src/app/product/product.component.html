@@ -35,7 +35,7 @@
 
             <tr *ngFor="let product of vm.products">
                 <td><img [src]="product.img" style="width:200px;"></td>
-                <td style="vertical-align: center;">{{product.name}}</td>
+                <td>{{product.name}}</td>
                 <td>{{product.description}}</td>
                 <td>{{product.price | currency }}</td>        
                 <td *ngIf="product.stock > product.minStock"><span class="badge badge-success spanStock">OK</span></td>
