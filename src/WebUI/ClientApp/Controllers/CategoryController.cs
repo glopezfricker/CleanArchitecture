@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CleanArchitecture.WebUI.Controllers;
 
-public class CategoryController : ApiControllerBase
+public class
+
+  CategoryController : ApiControllerBase
 {
   [HttpGet]
   public async Task<ActionResult<CategoriesVm>> Get()

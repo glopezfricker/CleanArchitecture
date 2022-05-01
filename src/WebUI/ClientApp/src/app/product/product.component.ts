@@ -1,9 +1,10 @@
 import { importExpr } from '@angular/compiler/src/output/output_ast';
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { product } from '../models/product';
-import { ProductsDto, ProductsVm, ProductClient, CreateProductCommand, CategoriesVm, CategoriesDto,CategoryClient } from '../web-api-client';
+import { ProductsDto, ProductsVm, ProductClient, CreateProductCommand, CategoriesVm, CategoriesDto,CategoryClient, UpdateProductCommand } from '../web-api-client';
 import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
-import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { BsModalService, BsModalRef} from 'ngx-bootstrap/modal';
+
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
@@ -13,11 +14,19 @@ export class ProductComponent implements OnInit {
 
   vm: ProductsVm;
   vmCategories: CategoriesVm;
+
   selectedCategories: CategoriesDto;
   selectedProducts: ProductsDto;
 
   newProductModalRef: BsModalRef;
   newProductEditor: any = {};
+  productEditor: any = {};
+
+  deleteProductModalRef: BsModalRef;
+  updateProductModalRef: BsModalRef;
+
+  productToDelete: ProductsDto;
+  productToUpdate: ProductsDto;
 
   faTrash = faTrash;
   faPenSquare = faPenSquare;
@@ -35,7 +44,8 @@ export class ProductComponent implements OnInit {
       //notice the user.
       error => console.error(error)
     );
-
+    //TODO: implement a new Get method that returns a smaller dto.
+    //We only need categoryId and description but me are getting img also.
     categoryClient.get().subscribe(
       result => {
         this.vmCategories = result;
@@ -71,7 +81,15 @@ export class ProductComponent implements OnInit {
       minStock: this.newProductEditor.minStock
     });
 
-    this.productClient.create(<CreateProductCommand>{ categoryId: this.newProductEditor.categoryId, name: this.newProductEditor.name}).subscribe(
+    this.productClient.create(<CreateProductCommand>{ 
+        categoryId: this.newProductEditor.categoryId, 
+        name: this.newProductEditor.name,
+        description: this.newProductEditor.description,
+        img: this.newProductEditor.img,
+        price: this.newProductEditor.price,
+        stock: this.newProductEditor.stock,
+        minStock: this.newProductEditor.minStock    
+    }).subscribe(
       result => {
         product.id = result;
         this.vm.products.push(product);
@@ -96,13 +114,47 @@ export class ProductComponent implements OnInit {
     this.newProductEditor.categoryId = e.target.value;
     console.log(e.target.value);
   }
-  ngOnInit(): void {
+
+  confirmDeleteProduct(template: TemplateRef<any>, productToDelete: ProductsDto){
+    this.productToDelete = productToDelete;
+    this.deleteProductModalRef = this.modalService.show(template);
   }
 
-  public onKeyUpEvent(event: any){         
-    let aux = event.target?.value;
-    if(aux){
-      console.log(aux);
-    }
+  showProductEditorModal(template: TemplateRef<any>, productToUpdate: ProductsDto){
+    //TODO: Check if we need both objects (productToUpdate, productEditor)
+    this.productToUpdate = productToUpdate;
+    this.productEditor = this.productToUpdate;
+    this.updateProductModalRef = this.modalService.show(template);
+  }
+
+  deleteProductConfirmed(): void {
+    this.productClient.delete(this.productToDelete.id).subscribe(
+      () => {
+        this.deleteProductModalRef.hide();
+        this.vm.products = this.vm.products.filter(p => p.id != this.productToDelete.id)
+        this.selectedProducts = this.vm.products.length ? this.vm.products[0] : null;
+      }, //TODO: handle error instead of going to console
+      error => console.log(error)
+    )
+  }
+
+  updateProduct(){
+    this.productClient.update(this.productToUpdate.id, UpdateProductCommand.fromJS(this.productEditor))
+      .subscribe(
+        () => {
+          this.productToUpdate.categoryId = this.productEditor.categoryId,
+          this.productToUpdate.name = this.productEditor.name,
+          this.productToUpdate.description = this.productEditor.description,
+          this.productToUpdate.img = this.productEditor.img,
+          this.productToUpdate.price = this.productEditor.price,
+          this.productToUpdate.stock = this.productEditor.stock,
+          this.productToUpdate.minStock = this.productEditor.minStock
+          this.updateProductModalRef.hide();
+          this.productEditor = {};
+        }, //TODO: handle error instead of going to console
+        error => console.error(error)
+      )
+  }
+  ngOnInit(): void {
   }
 }

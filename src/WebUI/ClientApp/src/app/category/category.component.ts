@@ -93,7 +93,7 @@ export class CategoryComponent implements OnInit {
         this.deleteCategoryModalRef.hide();
         this.vm.categories = this.vm.categories.filter(c => c.id != this.categoryToDelete.id)
         this.selectedCategories = this.vm.categories.length ? this.vm.categories[0] : null;
-      },
+      }, //TODO: handle error instead of going to console
       error => console.log(error)
     )
   }
@@ -107,7 +107,7 @@ export class CategoryComponent implements OnInit {
             this.categoryToUpdate.img = this.categoryEditor.img,
             this.updateCategoryModalRef.hide();
             this.categoryEditor = {};
-          },
+          }, //TODO: handle error instead of going to console
           error => console.error(error)
       );
    }

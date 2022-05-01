@@ -20,4 +20,25 @@ public class ProductController : ApiControllerBase
     return await Mediator.Send(command);
   }
 
+  [HttpDelete("{id}")]
+  public async Task<ActionResult<int>> Delete(int id)
+  {
+    await Mediator.Send(new DeleteProductCommand { Id = id });
+
+    return NoContent();
+  }
+
+  [HttpPut("id")]
+  public async Task<ActionResult> Update(int id, UpdateProductCommand command)
+  {
+    if(id != command.Id)
+    {
+      return BadRequest();
+    }
+
+    await Mediator.Send(command);
+
+    return NoContent();
+  }
+
 }

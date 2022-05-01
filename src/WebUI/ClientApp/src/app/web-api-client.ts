@@ -242,6 +242,8 @@ export class CategoryClient implements ICategoryClient {
 export interface IProductClient {
     get(): Observable<ProductsVm>;
     create(command: CreateProductCommand): Observable<number>;
+    delete(id: number): Observable<number>;
+    update(id: number | undefined, command: UpdateProductCommand): Observable<FileResponse>;
 }
 
 @Injectable({
@@ -355,6 +357,111 @@ export class ProductClient implements IProductClient {
             }));
         }
         return _observableOf<number>(<any>null);
+    }
+
+    delete(id: number) : Observable<number> {
+        let url_ = this.baseUrl + "/api/Product/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(<any>response_);
+                } catch (e) {
+                    return <Observable<number>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<number>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = resultData200 !== undefined ? resultData200 : <any>null;
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<number>(<any>null);
+    }
+
+    update(id: number | undefined, command: UpdateProductCommand) : Observable<FileResponse> {
+        let url_ = this.baseUrl + "/api/Product/id?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(command);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "application/octet-stream"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdate(<any>response_);
+                } catch (e) {
+                    return <Observable<FileResponse>><any>_observableThrow(e);
+                }
+            } else
+                return <Observable<FileResponse>><any>_observableThrow(response_);
+        }));
+    }
+
+    protected processUpdate(response: HttpResponseBase): Observable<FileResponse> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (<any>response).error instanceof Blob ? (<any>response).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200 || status === 206) {
+            const contentDisposition = response.headers ? response.headers.get("content-disposition") : undefined;
+            const fileNameMatch = contentDisposition ? /filename="?([^"]*?)"?(;|$)/g.exec(contentDisposition) : undefined;
+            const fileName = fileNameMatch && fileNameMatch.length > 1 ? fileNameMatch[1] : undefined;
+            return _observableOf({ fileName: fileName, data: <any>responseBlob, status: status, headers: _headers });
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<FileResponse>(<any>null);
     }
 }
 
@@ -1337,6 +1444,70 @@ export class CreateProductCommand implements ICreateProductCommand {
 }
 
 export interface ICreateProductCommand {
+    categoryId?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
+    price?: number;
+    stock?: number;
+    minStock?: number;
+}
+
+export class UpdateProductCommand implements IUpdateProductCommand {
+    id?: number;
+    categoryId?: number;
+    name?: string | undefined;
+    description?: string | undefined;
+    img?: string | undefined;
+    price?: number;
+    stock?: number;
+    minStock?: number;
+
+    constructor(data?: IUpdateProductCommand) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.categoryId = _data["categoryId"];
+            this.name = _data["name"];
+            this.description = _data["description"];
+            this.img = _data["img"];
+            this.price = _data["price"];
+            this.stock = _data["stock"];
+            this.minStock = _data["minStock"];
+        }
+    }
+
+    static fromJS(data: any): UpdateProductCommand {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateProductCommand();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["categoryId"] = this.categoryId;
+        data["name"] = this.name;
+        data["description"] = this.description;
+        data["img"] = this.img;
+        data["price"] = this.price;
+        data["stock"] = this.stock;
+        data["minStock"] = this.minStock;
+        return data; 
+    }
+}
+
+export interface IUpdateProductCommand {
+    id?: number;
     categoryId?: number;
     name?: string | undefined;
     description?: string | undefined;
