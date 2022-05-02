@@ -4,6 +4,7 @@ import { product } from '../models/product';
 import { ProductsDto, ProductsVm, ProductClient, CreateProductCommand, CategoriesVm, CategoriesDto,CategoryClient, UpdateProductCommand } from '../web-api-client';
 import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef} from 'ngx-bootstrap/modal';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-product',
@@ -31,7 +32,7 @@ export class ProductComponent implements OnInit {
   faTrash = faTrash;
   faPenSquare = faPenSquare;
 
-  constructor(private productClient: ProductClient, private categoryClient: CategoryClient, private modalService: BsModalService) { 
+  constructor(private productClient: ProductClient, private categoryClient: CategoryClient, private modalService: BsModalService, private notifyService: NotificationService) { 
     //TODO: maybe we can combine the observables with forkJoin operator.    
     productClient.get().subscribe(
       result => {
@@ -96,10 +97,11 @@ export class ProductComponent implements OnInit {
         this.selectedProducts = product;
         this.newProductModalRef.hide();
         this.newProductEditor = {};
+        this.notifyService.showSuccess("Producto Agregado Exitosamente.","Producto");
       },
       error => {
         let errors = JSON.parse(error.response);
-
+        this.notifyService.showError("Se ha Producido un Error, no se Pudo Crear el Producto.", "Producto");
         if(errors && errors.Title) {
           this.newProductEditor.error = errors.Title[0];
         }
@@ -133,8 +135,12 @@ export class ProductComponent implements OnInit {
         this.deleteProductModalRef.hide();
         this.vm.products = this.vm.products.filter(p => p.id != this.productToDelete.id)
         this.selectedProducts = this.vm.products.length ? this.vm.products[0] : null;
+        this.notifyService.showSuccess("Producto Eliminado Exitosamente", "Productos");        
       }, //TODO: handle error instead of going to console
-      error => console.log(error)
+      error => {
+        console.log(error);
+        this.notifyService.showError("Se ha Producido un error, no se Pudo Eliminar el Producto.", "Producto");
+      }
     )
   }
 
@@ -151,8 +157,12 @@ export class ProductComponent implements OnInit {
           this.productToUpdate.minStock = this.productEditor.minStock
           this.updateProductModalRef.hide();
           this.productEditor = {};
+          this.notifyService.showSuccess("Producto Modificado Exitosamente", "Productos");        
         }, //TODO: handle error instead of going to console
-        error => console.error(error)
+        error => {
+          console.error(error),
+          this.notifyService.showError("Se ha Producido un error, no se Pudo Modificar el Producto.", "Producto")
+        }
       )
   }
   ngOnInit(): void {

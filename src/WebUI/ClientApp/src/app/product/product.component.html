@@ -149,6 +149,13 @@ with all CRUD operations -->
     </div>
     <div class="modal-body">
         <div class="form-group">
+
+            <label for="productCategory">Categoria</label>            
+            <select class="form-control" id="productCategory" aria-label="Seleccion categorias" [(ngModel)]="productEditor.categoryId">                
+                <option disabled>Seleccionar Categoria...</option>
+                <option *ngFor="let category of vmCategories.categories" [value]="category.id">{{ category.name }} </option>                                                
+            </select>                        
+
             <label for="productName">Nombre</label>
             <input type="text" class="form-control" id="productName" placeholder="Nombre Producto..."
                 [(ngModel)]="productEditor.name" />

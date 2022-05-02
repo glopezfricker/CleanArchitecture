@@ -18,6 +18,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { TokenComponent } from './token/token.component';
 import { ProductComponent } from './product/product.component';
 import { CategoryComponent } from './category/category.component';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { CategoryComponent } from './category/category.component';
     ApiAuthorizationModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    ToastrModule.forRoot(),
     ModalModule.forRoot()
   ],
   providers: [

@@ -2,6 +2,7 @@ import { Component, TemplateRef, OnInit } from '@angular/core';
 import { CategoriesDto, CategoriesVm,  CategoryClient, CreateCategoryCommand, UpdateCategoryCommand} from '../web-api-client';
 import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { NotificationService } from '../notification.service';
 
 @Component({
   selector: 'app-category',
@@ -25,7 +26,7 @@ export class CategoryComponent implements OnInit {
   faTrash = faTrash;
   faPenSquare = faPenSquare;
 
-  constructor(private categoryClient: CategoryClient, private modalService: BsModalService) { 
+  constructor(private categoryClient: CategoryClient, private modalService: BsModalService, private notifyService: NotificationService) { 
     categoryClient.get().subscribe(
       result => { 
         this.vm = result;
@@ -61,9 +62,11 @@ export class CategoryComponent implements OnInit {
         this.selectedCategories = category;
         this.newCategoryModalRef.hide();
         this.newCategoryEditor = {};
+        this.notifyService.showSuccess("Categoria Agregada Exitosamente.", "Categoria");
       },
       error => {
         let errors = JSON.parse(error.response);
+        this.notifyService.showError("Se ha Producido un Error, no se Pudo Crear la Categoria.", "Categoria");
 
         if(errors && errors.Title) {
           this.newCategoryEditor.error = errors.Title[0];
@@ -93,8 +96,12 @@ export class CategoryComponent implements OnInit {
         this.deleteCategoryModalRef.hide();
         this.vm.categories = this.vm.categories.filter(c => c.id != this.categoryToDelete.id)
         this.selectedCategories = this.vm.categories.length ? this.vm.categories[0] : null;
+        this.notifyService.showSuccess("Categoria Eliminada Exitosamente", "Categorias");        
       }, //TODO: handle error instead of going to console
-      error => console.log(error)
+      error => {
+        console.log(error);
+        this.notifyService.showError("Se ha Producido un error, no se Pudo Eliminar la Categoria.", "Categoria");
+      }
     )
   }
 
@@ -107,11 +114,14 @@ export class CategoryComponent implements OnInit {
             this.categoryToUpdate.img = this.categoryEditor.img,
             this.updateCategoryModalRef.hide();
             this.categoryEditor = {};
+            this.notifyService.showSuccess("Categoria Modificada Exitosamente", "Categorias");        
           }, //TODO: handle error instead of going to console
-          error => console.error(error)
+          error => {
+            console.error(error);
+            this.notifyService.showError("Se ha Producido un error, no se Pudo Modificar la Categoria.", "Categoria")
+          }
       );
    }
-
   ngOnInit(): void {
     
   }
