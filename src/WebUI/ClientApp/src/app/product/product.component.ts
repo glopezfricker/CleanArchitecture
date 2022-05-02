@@ -5,17 +5,18 @@ import { ProductsDto, ProductsVm, ProductClient, CreateProductCommand, Categorie
 import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef} from 'ngx-bootstrap/modal';
 import { NotificationService } from '../notification.service';
-
+//TODO: Use product service to fetch, delete, modify and delete data.
 @Component({
   selector: 'app-product',
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.scss']
 })
 export class ProductComponent implements OnInit {
-
+  selectedFilter : number;
   vm: ProductsVm;
+  unfilteredProducts : ProductsDto[];
   vmCategories: CategoriesVm;
-
+  
   selectedCategories: CategoriesDto;
   selectedProducts: ProductsDto;
 
@@ -37,8 +38,9 @@ export class ProductComponent implements OnInit {
     productClient.get().subscribe(
       result => {
         this.vm = result;
+        this.unfilteredProducts = [...this.vm.products];
         if(this.vm.products?.length){
-          this.selectedProducts = this.vm.products[0];
+          this.selectedProducts = this.vm.products[0];          
         }
       },
       //TODO: perhaps instead of using console implement a toast or an alert to 
@@ -50,8 +52,8 @@ export class ProductComponent implements OnInit {
     categoryClient.get().subscribe(
       result => {
         this.vmCategories = result;
-        if(this.vmCategories.categories?.length){
-          this.selectedCategories = this.vmCategories.categories[0];
+        if(this.vmCategories.categories?.length){          
+          this.selectedCategories = this.vmCategories.categories[0];          
         }
       },
       //TODO: perhaps instead of using console implement a toast or an alert to 
@@ -94,10 +96,12 @@ export class ProductComponent implements OnInit {
       result => {
         product.id = result;
         this.vm.products.push(product);
+        this.unfilteredProducts.push(product);
         this.selectedProducts = product;
         this.newProductModalRef.hide();
         this.newProductEditor = {};
         this.notifyService.showSuccess("Producto Agregado Exitosamente.","Producto");
+        this.filterByCategory(this.selectedFilter);
       },
       error => {
         let errors = JSON.parse(error.response);
@@ -133,13 +137,17 @@ export class ProductComponent implements OnInit {
     this.productClient.delete(this.productToDelete.id).subscribe(
       () => {
         this.deleteProductModalRef.hide();
-        this.vm.products = this.vm.products.filter(p => p.id != this.productToDelete.id)
+        this.vm.products = this.vm.products.filter(p => p.id != this.productToDelete.id);
+        console.log("0:",this.unfilteredProducts);        
+        this.unfilteredProducts = this.unfilteredProducts.filter(p => p.id != this.productToDelete.id);
+        console.log("1:",this.unfilteredProducts);
         this.selectedProducts = this.vm.products.length ? this.vm.products[0] : null;
         this.notifyService.showSuccess("Producto Eliminado Exitosamente", "Productos");        
       }, //TODO: handle error instead of going to console
       error => {
         console.log(error);
         this.notifyService.showError("Se ha Producido un error, no se Pudo Eliminar el Producto.", "Producto");
+        this.filterByCategory(this.selectedFilter);
       }
     )
   }
@@ -148,6 +156,7 @@ export class ProductComponent implements OnInit {
     this.productClient.update(this.productToUpdate.id, UpdateProductCommand.fromJS(this.productEditor))
       .subscribe(
         () => {
+          this.unfilteredProducts[this.unfilteredProducts.findIndex(p => p.id = this.productToUpdate.id)].categoryId = this.productToUpdate.categoryId;
           this.productToUpdate.categoryId = this.productEditor.categoryId,
           this.productToUpdate.name = this.productEditor.name,
           this.productToUpdate.description = this.productEditor.description,
@@ -158,6 +167,7 @@ export class ProductComponent implements OnInit {
           this.updateProductModalRef.hide();
           this.productEditor = {};
           this.notifyService.showSuccess("Producto Modificado Exitosamente", "Productos");        
+          this.filterByCategory(this.selectedFilter);
         }, //TODO: handle error instead of going to console
         error => {
           console.error(error),
@@ -165,6 +175,19 @@ export class ProductComponent implements OnInit {
         }
       )
   }
+
+  onChange(e){
+    this.selectedFilter = e;
+    this.filterByCategory(this.selectedFilter);
+  }
+
+  filterByCategory(categoryId){          
+    
+    if(this.vm && categoryId){
+      this.vm.products = categoryId > 0 ? this.vm.products = this.unfilteredProducts.filter((x:any) => {return x.categoryId == categoryId}) : this.vm.products = this.unfilteredProducts.filter((x:any) => {return x.categoryId > -1})                 
+    }
+  }
+  
   ngOnInit(): void {
   }
 }

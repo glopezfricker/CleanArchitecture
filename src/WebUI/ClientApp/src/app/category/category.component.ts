@@ -1,8 +1,9 @@
 import { Component, TemplateRef, OnInit } from '@angular/core';
-import { CategoriesDto, CategoriesVm,  CategoryClient, CreateCategoryCommand, UpdateCategoryCommand} from '../web-api-client';
-import { faTrash, faPenSquare } from '@fortawesome/free-solid-svg-icons';
+import { CategoriesDto, CategoriesVm} from '../web-api-client';
+import { faTrash, faPenSquare, faGrinTongueSquint } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { NotificationService } from '../notification.service';
+import { CategoryService } from '../services/category.service';
 
 @Component({
   selector: 'app-category',
@@ -25,9 +26,9 @@ export class CategoryComponent implements OnInit {
 
   faTrash = faTrash;
   faPenSquare = faPenSquare;
-
-  constructor(private categoryClient: CategoryClient, private modalService: BsModalService, private notifyService: NotificationService) { 
-    categoryClient.get().subscribe(
+  
+  constructor(private modalService: BsModalService, private notifyService: NotificationService, private categoryService: CategoryService) { 
+    categoryService.getCategories().subscribe(
       result => { 
         this.vm = result;
         if(this.vm.categories?.length) {
@@ -35,7 +36,7 @@ export class CategoryComponent implements OnInit {
         }
       },
       error => console.error(error)
-    );
+    );    
   }
   showNewCategoryModal(template: TemplateRef<any>): void {
     this.newCategoryModalRef = this.modalService.show(template);
@@ -47,35 +48,29 @@ export class CategoryComponent implements OnInit {
     this.newCategoryEditor = {};
   }
 
-  addCategory(): void {
-    let category = CategoriesDto.fromJS({
-      id: 0,
-      name: this.newCategoryEditor.name,            
-      description: this.newCategoryEditor.description,
-      img: this.newCategoryEditor.img,
-    });
-
-    this.categoryClient.create(<CreateCategoryCommand>{ name: this.newCategoryEditor.name}).subscribe(
+  addCategory(): void {       
+     let category = this.categoryService.setCategoryToAdd(this.newCategoryEditor);
+    this.categoryService.addCategory(this.newCategoryEditor.name).subscribe(
       result => {
-        category.id = result;
-        this.vm.categories.push(category);
-        this.selectedCategories = category;
-        this.newCategoryModalRef.hide();
-        this.newCategoryEditor = {};
-        this.notifyService.showSuccess("Categoria Agregada Exitosamente.", "Categoria");
-      },
-      error => {
-        let errors = JSON.parse(error.response);
-        this.notifyService.showError("Se ha Producido un Error, no se Pudo Crear la Categoria.", "Categoria");
-
-        if(errors && errors.Title) {
-          this.newCategoryEditor.error = errors.Title[0];
-        }
-
-        setTimeout(() => document.getElementById("name").focus(), 250);
-
-      }
-    );
+            category.id = result;
+            this.vm.categories.push(category);
+            this.selectedCategories = category;
+            this.newCategoryModalRef.hide();
+            this.newCategoryEditor = {};
+            this.notifyService.showSuccess("Categoria Agregada Exitosamente.", "Categoria");
+          },
+          error => {
+            let errors = JSON.parse(error.response);
+            this.notifyService.showError("Se ha Producido un Error, no se Pudo Crear la Categoria.", "Categoria");
+    
+            if(errors && errors.Title) {
+              this.newCategoryEditor.error = errors.Title[0];
+            }
+    
+            setTimeout(() => document.getElementById("name").focus(), 250);
+    
+          }
+    )
   }
 
   confirmDeleteCategory(template: TemplateRef<any>, categoryToDelete: CategoriesDto) {    
@@ -90,8 +85,8 @@ export class CategoryComponent implements OnInit {
     this.updateCategoryModalRef = this.modalService.show(template);
   }
 
-  deleteCategoryConfirmed(): void {
-    this.categoryClient.delete(this.categoryToDelete.id).subscribe(
+  deleteCategoryConfirmed(): void {    
+    this.categoryService.deleteCategory(this.categoryToDelete.id).subscribe(
       () => {
         this.deleteCategoryModalRef.hide();
         this.vm.categories = this.vm.categories.filter(c => c.id != this.categoryToDelete.id)
@@ -106,7 +101,7 @@ export class CategoryComponent implements OnInit {
   }
 
    updateCategory(){
-     this.categoryClient.update(this.categoryToUpdate.id, UpdateCategoryCommand.fromJS(this.categoryEditor))
+    this.categoryService.updateCategory(this.categoryToUpdate.id, this.categoryEditor)     
       .subscribe(
           () => {
             this.categoryToUpdate.name = this.categoryEditor.name,

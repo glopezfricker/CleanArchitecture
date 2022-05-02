@@ -3,6 +3,17 @@
 </div>
 
 <!-- TODO: Logic seems to be complex. Evaluate and refactor all *ngIf -->
+<div class="row">            
+    <div class="col-md-6 ">        
+        <label for="categoryFilter" style="font-weight: bold; display:inline">Filtrar por categorias: </label>
+        <select id="categoryFilter" aria-label="Filtrar categorias"  style="font-weight: bold; display:inline;" (change)="onChange($event.target.value)">                
+            <option selected value="-1">Todas...</option>
+            <option *ngFor="let category of vmCategories.categories" [value]="category.id">{{ category.name }} </option>                                                
+        </select>    
+    </div>                                                     
+</div>   
+<hr>
+
 <div *ngIf = "vm && vm.products.length == 0">
     <div class="alert alert-info" role="alert" > No hay productos cargados.</div>
     <div class="alert alert-info" role="alert" *ngIf="vmCategories && vmCategories.categories.length == 0 " > No hay categorias cargadas, debe cargar primero una categoria.</div>
@@ -17,7 +28,7 @@
   </div>
 
 
-<div *ngIf ="vm && vm.products.length > 0">
+<div *ngIf ="vm && vm.products.length > 0">       
     <form class="col-12 col-lg-auto mb-3 mb-lg-0">
         <input type="search" class="form-control" placeholder="Search..." aria-label="Search" (keyup)="onKeyUpEvent($event)" >
     </form>
@@ -102,15 +113,15 @@ with all CRUD operations -->
                 [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
             
             <label for="price">Precio</label>
-            <input type="text" class="form-control" id="price" placeholder="Precio producto..." [(ngModel)] = "newProductEditor.price"
+            <input type="number" min="0" class="form-control" id="price" placeholder="Precio producto..." [(ngModel)] = "newProductEditor.price"
                 [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
 
             <label for="stock">Stock</label>
-            <input type="text" class="form-control" id="stock" placeholder="Stock producto..." [(ngModel)] = "newProductEditor.stock"
+            <input type="number" min="0" class="form-control" id="stock" placeholder="Stock producto..." [(ngModel)] = "newProductEditor.stock"
                 [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
             
             <label for="minStock">Stock Minimo</label>
-            <input type="text" class="form-control" id="minStock" placeholder="Stock minimo producto..." [(ngModel)] = "newProductEditor.minStock"
+            <input type="number" min="0" min="0" class="form-control" id="minStock" placeholder="Stock minimo producto..." [(ngModel)] = "newProductEditor.minStock"
                 [ngClass] ="{ 'is-invalid': newProductEditor.error }" />
         </div>    
     </div>
@@ -169,15 +180,15 @@ with all CRUD operations -->
                 [(ngModel)]="productEditor.img" />
 
             <label for="productPrice">Precio</label>
-            <input type="text" class="form-control" id="productPrice" placeholder="Precio Producto..."
+            <input type="number" min="0" class="form-control" id="productPrice" placeholder="Precio Producto..."
             [(ngModel)]="productEditor.price" />
 
             <label for="productStock">Stock</label>
-            <input type="text" class="form-control" id="productStock" placeholder="Stock Producto..."
+            <input type="number" min="0" class="form-control" id="productStock" placeholder="Stock Producto..."
             [(ngModel)]="productEditor.stock" />
 
             <label for="productMinStock">Stock Minimo</label>
-            <input type="text" class="form-control" id="productMinStock" placeholder="Minimo Stock Producto..."
+            <input type="number" min="0" class="form-control" id="productMinStock" placeholder="Minimo Stock Producto..."
             [(ngModel)]="productEditor.minStock" />
         </div>   
     </div>
